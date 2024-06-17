@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Application</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            function getDados() {
+                $.ajax({
+                    url: 'functions.php',
+                    type: 'post',
+                    data: {action: 'get'},
+                    success: function(response) {
+                        $('#dadosTable').html(response);
+                    }
+                });
+            }
+
+            getDados(); // Fetch users on page load
+
+            // Event listener for adding new user
+            $('#addDadosForm').submit(function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                formData += '&action=add';
+                $.ajax({
+                    url: 'functions.php',
+                    type: 'post',
+                    data: formData,
+                    success: function() {
+                        getDados(); // Refresh user list after adding
+                        $('#addDadosForm')[0].reset(); // Reset form
+                    }
+                });
+            });
+
+            $(document).on('click', '.addDados', function(){
+                var dataId = $(this).data('id');
+                $.ajax({
+                    url: 'functions.php',
+                    type: 'post',
+                    data: formData,
+                    success: function() {
+                        getDados(); // Refresh user list after deletion
+                    }
+                });
+            });
+
+            // Event listener for deleting user
+            $(document).on('click', '.deleteDados', function(){
+                var dataId = $(this).data('id');
+                $.ajax({
+                    url: 'functions.php',
+                    type: 'post',
+                    data: {action: 'delete', id: dataId},
+                    success: function() {
+                        getDados(); // Refresh user list after deletion
+                    }
+                });
+            });
+
+            // Event listener for editing user
+            $(document).on('click', '.editDados', function(){
+                var dataId = $(this).data('id');
+                var username = $(this).closest('tr').find('.username').text();
+                var email = $(this).closest('tr').find('.email').text();
+                
+                $('#editdataId').val(dataId);
+                $('#editUsername').val(username);
+                $('#editEmail').val(email);
+                $('#editDataModal').modal('show'); // Show modal
+            });
+
+            // Event listener for updating user
+            $('#editDataForm').submit(function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                formData += '&action=update';
+                $.ajax({
+                    url: 'functions.php',
+                    type: 'post',
+                    data: formData,
+                    success: function() {
+                        getDados(); // Refresh user list after updating
+                        $('#editDataModal').modal('hide'); // Hide modal
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5 mb-4">CRUD Application</h2>
+        <h3>Add User</h3>
+        <form id="addDadosForm">
+            <div class="form-group">
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control" name="email" placeholder="Email" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add User</button>
+        </form>
+
+        <h3 class="mt-4">Users</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="dadosTable">
+                <!-- User data will be displayed here -->
+            </tbody>
+        </table>
+
+        <!-- Edit User Modal -->
+        <div id="editDataModal" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Editar Dados</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editDataForm">
+                            <input type="hidden" id="editdataId" name="id">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="editUsername" name="username" placeholder="Username" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="editEmail" name="email" placeholder="Email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Atualizar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
